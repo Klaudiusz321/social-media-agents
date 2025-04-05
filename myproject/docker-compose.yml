@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: 
+      - .env
+    volumes:
+      # Use named volumes for persistent data
+      - static_volume:/app/static
+      - media_volume:/app/media
+      - data_volume:/app/data
+      - logs_volume:/app/logs
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/chat/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  static_volume:
+  media_volume:
+  data_volume:
+  logs_volume: 

@@ -1,0 +1,155 @@
+/* Main layout */
+body {
+    background-color: #f8f9fa;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 56px);
+}
+
+.chat-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Message styling */
+.message {
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 75%;
+    position: relative;
+}
+
+.user-message {
+    background-color: #007bff;
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 5px;
+}
+
+.ai-message {
+    background-color: #f1f0f0;
+    color: #212529;
+    margin-right: auto;
+    border-bottom-left-radius: 5px;
+    border-left: 3px solid #7952b3;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    margin-top: 5px;
+    opacity: 0.7;
+    display: block;
+}
+
+.message-form {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Agent selector styling */
+.agent-selector {
+    margin-bottom: 20px;
+}
+
+.agent-card {
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+}
+
+.agent-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.agent-card.active {
+    border-color: #007bff;
+    background-color: rgba(0,123,255,0.05);
+}
+
+.agent-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.agent-badge {
+    display: none;
+}
+
+/* Primary Agent specific styles */
+.primary-agent-message {
+    border-left: 3px solid #9c27b0;
+}
+
+/* Markdown-like content */
+.message-content {
+    white-space: pre-line;
+    margin-bottom: 5px;
+}
+
+.message-content ul, .message-content ol {
+    padding-left: 20px;
+}
+
+.message-content p {
+    margin-bottom: 0.5rem;
+}
+
+.message-content code {
+    background-color: rgba(0,0,0,0.05);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+}
+
+/* Loading indicator */
+.sending-indicator {
+    display: none;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.sending-indicator .spinner-border {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 10px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .chat-container {
+        height: calc(100vh - 120px);
+    }
+    
+    .message {
+        max-width: 85%;
+    }
+}
+
+/* Make sure our agent badges are properly placed */
+.ai-message .agent-badge {
+    margin-left: 5px;
+}
+
+/* Add a small visual indicator for the primary agent */
+.modal-body .list-group-item:has(.primary-agent-icon) {
+    border-left: 3px solid #9c27b0;
+}
+
+/* Add subagent message styling */
+.subagent-message {
+    border-left: 3px solid #3498db;
+    background-color: #eaf2f8;
+} 
