@@ -1,0 +1,31 @@
+# Core dependencies
+python-dotenv>=1.0.0
+requests>=2.31.0
+openai>=1.6.0
+logging>=0.4.9
+argparse>=1.4.0
+
+# Image generation
+Pillow>=10.0.0
+
+# API integrations
+tweepy>=4.14.0
+instagrapi>=1.19.4
+linkedin-api>=2.0.0a
+
+# Utilities
+python-dateutil>=2.8.2
+schedule>=1.2.0
+tqdm>=4.66.1
+markdown>=3.4.3
+beautifulsoup4>=4.12.2
+lxml>=4.9.3
+
+# Scheduler dependencies
+pytz>=2023.3
+tzlocal>=5.0.1
+APScheduler>=3.10.1
+pydantic>=2.4.0
+
+# Optional third-party integrations
+# boto3>=1.28.38  # Uncomment if using AWS S3 for image storage 

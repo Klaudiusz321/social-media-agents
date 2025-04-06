@@ -1,0 +1,51 @@
+{
+    "brand_name": "AstroCalc Pro",
+    "voice": "Educational, enthusiastic, and authoritative but accessible. Use friendly language that makes complex topics approachable. Be conversational but accurate. Balance technical precision with engaging explanations.",
+    "content_requirements": "Always include the product name 'AstroCalc Pro' when relevant. Focus on educational value. Use metric units for measurements. Ensure all scientific claims are accurate. When possible, relate content to real-world applications or current events.",
+    "prohibited": "Avoid political statements. No religious references. Don't criticize other brands or products. No exaggerated or unsubstantiated claims. Avoid overly technical jargon without explanation.",
+    "visual_style": "Clean, modern aesthetic with deep space blues and cosmic purples. Prefer scientific illustrations over abstract art. Educational diagrams should be clear and labeled.",
+    "product_mentions": "Refer to our product as 'AstroCalc Pro' on first mention, then 'AstroCalc' or 'the app' in subsequent mentions. Highlight one feature per post. Phrase as a benefit, not just a feature.",
+    "platforms": {
+        "twitter": {
+            "tone": "More casual, brief but impactful",
+            "hashtags": ["#AstroCalcPro", "#Astronomy", "#SpaceScience"],
+            "cta": "Encourage clicks to profile link"
+        },
+        "instagram": {
+            "tone": "Visual first, focus on awe and wonder",
+            "hashtags": ["#AstroCalcPro", "#Astronomy", "#SpaceLovers", "#AstronomyFacts"],
+            "cta": "Encourage profile visits and app downloads"
+        },
+        "linkedin": {
+            "tone": "Professional, educational focus, industry insights",
+            "hashtags": ["#SpaceTech", "#STEM", "#ScienceEducation"],
+            "cta": "Position as thought leaders, encourage professional discussion"
+        }
+    },
+    "product_features": [
+        {
+            "name": "Stellar Simulator",
+            "description": "Accurately simulate and visualize star patterns from any location on Earth",
+            "benefit": "Explore the night sky from anywhere, even before you travel there"
+        },
+        {
+            "name": "Eclipse Tracker",
+            "description": "Predict and visualize solar and lunar eclipses with precision timing",
+            "benefit": "Never miss another celestial event with personalized notifications"
+        },
+        {
+            "name": "Planet Viewer",
+            "description": "Interactive 3D models of all planets and major moons in our solar system",
+            "benefit": "Discover the wonders of our solar system in stunning detail"
+        },
+        {
+            "name": "Astronomy Calculator",
+            "description": "Advanced calculations for orbital mechanics, gravitational forces, and more",
+            "benefit": "Solve complex astronomy problems with just a few taps"
+        }
+    ],
+    "target_audience": {
+        "primary": "Amateur astronomers, educators, STEM enthusiasts",
+        "secondary": "Students, casual stargazers, science communicators"
+    }
+} 

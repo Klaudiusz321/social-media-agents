@@ -1,0 +1,48 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+System Architecture and Agent Roles
+Our system consists of multiple specialized AI agents collaborating to drive the social media strategy. Each agent has a distinct role, and together they function as an “AI marketing team.” Leveraging a multi-agent design ensures tasks are handled by experts in each domain​
+MEDIUM.COM
+. The primary agents and their responsibilities are:
+TrendScannerAgent: Monitors Twitter/X, Instagram, and LinkedIn for trending topics, hashtags, and content formats. It outputs timely insights (e.g. popular hashtags or memes in our niche) that inform content creation.
+ContentCreatorAgent: Uses generative AI (e.g. OpenAI GPT-4 for text, Stable Diffusion or Midjourney for images) to produce engaging posts. It tailors the tone and format for each platform and follows predefined brand guidelines (supplied as JSON templates).
+SchedulerAgent: Determines the optimal posting schedule for each platform and automates the publishing via platform APIs. It ensures posts go out at high-engagement times and logs all actions, caching API responses (like trend data) to reuse when appropriate.
+Other supporting components could include an AnalyticsAgent (to analyze performance metrics and refine strategy) or an EngagementAgent (to handle replies and community interaction), as seen in similar multi-agent setups​
+LINKEDIN.COM
+. A Coordinator or orchestrator process is also needed to facilitate data flow between agents (or one agent could take on a coordinator role). The table below summarizes the core agents:
+Agent	Role	Key Functions	APIs/Tools Used
+TrendScannerAgent	Trend monitoring on Twitter, IG, LinkedIn	- Fetch trending hashtags/topics on each platform
+- Identify popular content formats (e.g. memes, short videos)
+- Cache recent trends to avoid redundant API calls	Twitter API (trending topics)​
+DEVELOPER.X.COM
+
+Instagram Graph API (hashtag search)​
+STACKOVERFLOW.COM
+
+LinkedIn (3rd-party or scraping)​
+TAPLIO.COM
+ContentCreatorAgent	Content generation (text & media)	- Generate post text using OpenAI (GPT) following brand tone
+- Create accompanying images (via Stability AI or Midjourney)
+- Adapt content to platform norms (length, style, hashtags)	OpenAI API (GPT-4 text)​
+MILVUS.IO
+
+Stable Diffusion API (images)​
+PLATFORM.STABILITY.AI
+ or Midjourney
+Brand guidelines JSON for style
+SchedulerAgent	Scheduling & publishing automation	- Determine best times to post for each platform
+- Publish posts via APIs (Twitter, Instagram, LinkedIn)
+- Log post URLs/IDs and outcomes, handle errors/retries	Twitter API (posting tweets)​
+LINKEDIN.COM
+
+Instagram Graph API (media publish)​
+BRYAN-GUNER.GITBOOK.IO
+
+LinkedIn API (UGC posts)​
+LEARN.MICROSOFT.COM
+
+Scheduling library (cron or APScheduler)
+Each agent can be implemented as an AI-powered service with its own .mdc configuration file defining its behavior. We will now dive into each agent’s design and prompt, followed by the integration strategy and API best practices.

@@ -1,0 +1,94 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+OpenAI API (Text Generation & Moderation)
+Choosing the Right Model: Use the latest GPT-4 or GPT-3.5-turbo model for content generation. GPT-4 generally yields higher quality and more reliable adherence to instructions (important for brand voice). Use the Chat Completion API with a structured message (system message could be the .mdc content for ContentCreatorAgent, user message could contain the specific prompt with trends and product info).
+Prompt Engineering: We’ve crafted detailed prompts in the .mdc files. In practice, you’ll pass those as the system role content. Keep prompts clear about the task and constraints. If needed, provide examples in the prompt (few-shot learning) – e.g., show a sample trending topic and a sample post the brand might make – to guide style. OpenAI has a prompt best-practices guide​
+HELP.OPENAI.COM
+; key tips include giving the AI context about who it is (“You are a ContentCreatorAgent…”) and what the output format should look like, both of which we have done.
+Parameters: Control randomness via temperature and top_p. For social content, a bit of creativity is good, but we don’t want the tone to shift unpredictably. A temperature around 0.7 is a good start; if outputs vary too much in quality, lower it towards 0.5. max_tokens should be set per platform: maybe ~100 tokens for a tweet, ~200 for an IG caption, ~300-500 for a LinkedIn post. We can also use stop sequences if needed to ensure the model stops at the end of each section (though with our prompt structure, it should output distinct sections naturally).
+Moderation: Always run the generated text through OpenAI’s Moderation API​
+MILVUS.IO
+ (or an equivalent content filter) before publishing. This will catch any hate speech, sexual content, self-harm indications, etc. Even though our domain is innocuous, it’s good practice. If the moderation flags something, the SchedulerAgent can either drop that post or request the ContentCreatorAgent to regenerate with adjustments (perhaps by adding a caution in the prompt to avoid whatever content was flagged).
+Rate Limiting & Costs: Plan the frequency of OpenAI API calls to manage cost. If generating content daily, this is minimal. But if our system scales (many posts or many drafts), consider caching outputs. You might also consider fine-tuning a smaller model on your content style to use for quicker/cheaper generation, but given the complexity of trend-aware content, sticking with a powerful model might be easier. The OpenAI API has rate limits (e.g., number of requests per minute) depending on your account level; our usage is likely low, but handle exceptions where the API might throw a RateLimitError by catching and sleeping for a bit.
+Image Generation APIs (Stability AI, Midjourney)
+Stability AI (Stable Diffusion): Stability provides a REST API and SDK for text-to-image. Use the prompt from ContentCreatorAgent to request an image. You can specify parameters like the model (e.g., Stable Diffusion XL vs others), resolution, number of samples, etc. For instance, using POST https://api.stability.ai/v2/generation/stable-diffusion-xl-1024x1024/text-to-image with the appropriate JSON payload (prompt, API key, etc.) will return an image. The Stability API allows for some customization like style presets. Keep prompts descriptive but not too long (the ContentCreatorAgent’s image description should suffice). Check the API’s rate limits – if generating many images, space them out. If needed, the agent could generate images in off-peak hours and cache them.
+Midjourney: Without an official API, using Midjourney means using their Discord bot. Some automation approaches include using a Discord library (like discord.py) to send a command to the bot and listen for the response (which comes as an image URL). This is hacky but has been done by some developers. Given our context, it might be simpler to rely on Stable Diffusion or OpenAI’s DALL·E API (which does have an API) for integration. If ultra-realistic or specific art style images are critical, and you have Midjourney access, you could semi-automate it (e.g., have the agent output a Midjourney prompt, which a human or a separate script runs).
+Image Libraries: If using Python, libraries like requests can handle the API calls, and PIL (Pillow) can handle any image post-processing (resizing, adding logo watermark if needed, etc.). For Stability, there’s also a stability-sdk in Python. Always store the returned images (e.g., in cloud storage or on disk with a naming convention tied to the post) so that the SchedulerAgent can access the image path to upload to the platforms.
+Moderation for Images: Just as with text, be cautious with images. Stable Diffusion could theoretically generate something off (less likely for our prompts, but if using user-suggested content it could). Have a quick check – either a vision moderation model or manual review – for the images. Also ensure you have rights to use them (images generated by Stable Diffusion or Midjourney are generally yours to use, but check their license terms especially for commercial use if applicable).
+Twitter API (now X API) Integration
+API Access: As of 2025, Twitter’s API (rebranded as X API) requires a developer account and possibly a paid tier for posting capabilities, depending on volume. Ensure you have the necessary write permissions. Using OAuth 2.0 with a bearer token that has write scope or OAuth 1.1 with consumer and access tokens is required for posting tweets.
+Libraries: Tweepy is a popular Python library that simplifies calling Twitter APIs​
+LINKEDIN.COM
+. It handles auth and endpoints easily. For example, after setting up api = tweepy.API(auth), you can use api.update_status() to tweet text, and api.media_upload() for images. Another library is Python Twitter Tools or just direct requests if you prefer manual calls.
+Trends Endpoint: Twitter’s trends can be retrieved via v1.1 endpoints as mentioned. Tweepy supports this via api.trends_place(woeid). Since global WOEID = 1, api.trends_place(1) gives worldwide trends (or use a specific country/locale WOEID for targeted trends)​
+DEVELOPER.X.COM
+. Note that as of a certain API version, there was no v2 equivalent for trends, so v1.1 is used with elevated access​
+DEVCOMMUNITY.X.COM
+.
+Posting Tweets: Use the v2 endpoint POST /2/tweets if using HTTP requests (you’ll need to include the tweet text and optional media IDs JSON). With Tweepy (which as of v4 supports v2 endpoints), just use the convenience functions. If posting threads, you’ll need to post one tweet, get its ID, then post the next with in_reply_to that ID. It might be easier to keep our content to single tweets unless there’s a strong reason for a thread.
+Rate Limits: Posting tweets has a rate limit (e.g., 300 tweets per 3 hours for a user). Our schedule is fine, but if you ever implement an EngagementAgent responding to many tweets, keep that in mind. The trends endpoint has its own limit (75 requests per 15 min window)​
+DEVELOPER.X.COM
+ which our hourly usage easily meets.
+Error Handling: On failure, Twitter API gives codes. For example, code 187 for duplicate tweet (Twitter disallows posting the exact same content again). If the SchedulerAgent gets that, it should log that this content was duplicate and maybe modify it or skip. Code 89 for invalid/expired token – then you need to re-auth. Handle these gracefully.
+Future: If X (Twitter) changes things (they sometimes adjust API policies), be ready to update the integration. Currently, we rely on stable endpoints.
+Instagram API Integration
+API Access: Use the Instagram Graph API (not the old deprecated Instagram Basic API). This requires a Facebook Developer App, connecting an Instagram Business/Creator account to a Facebook Page, and obtaining a token with instagram_basic, pages_show_list, and instagram_content_publish permissions. Once set, you get a long-lived token (good for ~60 days) which you’d need to refresh periodically.
+Hashtag Search: As mentioned, you can search for a hashtag ID by GET /ig_hashtag_search?user_id={ig-user-id}&q={hashtag}. Then, use GET /{hashtag-id}/top_media?user_id={ig-user-id} to get top posts for that hashtag​
+STACKOVERFLOW.COM
+. The Graph API returns media objects (with captions, like counts, etc.). This is useful for TrendScannerAgent to gauge what content under a hashtag is performing (though the API’s “top_media” is limited to that hashtag’s context).
+Posting Content: The Content Publishing API supports photo and video posts (not stories, and Reels had been added in API for some accounts by 2023). For a photo:
+POST /{ig-user-id}/media with image_url={URL of image} (or you can upload a byte payload via a different approach), caption={caption text}, and optionally location_id or user_tags. This returns an id (container ID).
+POST /{ig-user-id}/media_publish with creation_id={the id from previous step} to publish​
+BRYAN-GUNER.GITBOOK.IO
+. After this, the post is live and the response will include the Instagram media ID (which can be used to get insights later).
+If the image is local, you need to either host it somewhere accessible (one trick is to upload it to a cloud storage with a public link, then use that URL in the image_url field) since the API expects a URL. Another method is the Resumable Upload API for videos or the Content Publishing edge can accept binary via multipart form (but that’s typically for videos).
+Libraries: There isn’t an official Python SDK from Instagram, but Facebook’s Graph API Python SDK could help, or direct use of requests. There is also instagram_graph_api community libraries or simply using Facebook’s Graph Explorer to test calls.
+Rate Limits: Graph API has limits measured by “API Units”. Posting a media isn’t heavy on units, but keep an eye if doing a lot of reading of insights or hashtag data. Also, too-frequent posting might flag as spam – Instagram generally advises not more than 25 posts per day on an account to avoid issues (we are way below that).
+Testing: It’s wise to test with a dummy Instagram account first, as the API workflow has several moving parts. Once confirmed, use the real account. Also note captions on IG can include hashtags and emojis fine, but can’t include certain disallowed things (e.g., no link shorteners in caption – IG might treat posts with only hashtags or only promos as low quality, though not a strict rule).
+LinkedIn API Integration
+API Access: Use the LinkedIn Marketing API for posting. You need a LinkedIn Developer application. If posting to a user profile, you need that user to auth your app with the w_member_social scope​
+LEARN.MICROSOFT.COM
+. If posting to a Company Page, you need w_organization_social and the user must be an admin of that page. LinkedIn’s API is quite strict about approval; sometimes you need your app to be in “Development” mode where only specified users (like yourself) can use it, unless you apply for Marketing API permissions for wider use.
+Posting (UGC vs Shares): LinkedIn provides two similar endpoints: “UGC Post” (User Generated Content) and “Shares”. UGC is more feature-rich and is the recommended way for new posts with text, images, etc. The request is a JSON with structure including:
+author: like "urn:li:person:<person-id>" or "urn:li:organization:<org-id>".
+lifecycleState: "PUBLISHED" (for immediate publish)​
+LEARN.MICROSOFT.COM
+.
+specificContent: which includes com.linkedin.ugc.ShareContent object with media and text.
+visibility: e.g. "PUBLIC".
+To attach an image, the flow is: register an upload (POST to a media create endpoint to get an upload URL and asset id), PUT the image bytes to that URL, then include the asset id in the UGC post JSON under media. LinkedIn’s docs provide this step-by-step. There are libraries like linkedin-api (unofficial) or Ayrshare (a third-party service) that can simplify this. Ayrshare, for example, provides a unified API to post to multiple social networks including LinkedIn​
+AYRSHARE.COM
+ – using such a service is an alternative approach (it handles the API intricacies, you just call their endpoint with your content). However, using third-party introduces dependencies and possibly cost; doing it directly gives more control.
+Rate Limits: LinkedIn’s posting rate limit is generous in that a user likely can do dozens per day without problem. However, try not to post more than a few times a day on LinkedIn anyway, as a best practice (LinkedIn feed algorithms might not surface multiple posts from the same entity in short span).
+Formatting: LinkedIn posts allow newlines and hashtags. They automatically hyperlink URLs in the text. Hashtags should be prefixed with # as usual; the API may require them to be in the text of the post. Tagging someone or a page requires using specific mention syntax in the JSON (which is more complicated, needing the entity URN); we might avoid that for now or only do it if certain.
+Testing: Use a test company page or your own profile (set visibility to connections only, for instance) to try out the API calls. The LinkedIn API can be the trickiest to get right due to its strictness in data format and auth.
+Combined API Usage and Libraries
+A quick comparison of how we’ll use each platform API is in the table below:
+Platform	API Endpoints (Examples)	Library/Tool	Notes
+Twitter	GET /1.1/trends/place.json?id=1 (trends)​
+DEVELOPER.X.COM
+
+POST /2/tweets (create tweet)	Tweepy (Python)	Need Bearer Token or consumer keys. Tweepy handles OAuth and has methods for trends and posting.
+Instagram	GET /ig_hashtag_search (get hashtag ID)​
+STACKOVERFLOW.COM
+
+GET /{hashtag-id}/top_media (top posts)
+POST /{ig-user-id}/media (create media container)​
+BRYAN-GUNER.GITBOOK.IO
+
+POST /{ig-user-id}/media_publish (publish container)	Facebook Graph API (HTTP) or facebook-sdk	Requires Business IG account and token with permissions. Two-step publish process. Consider using a wrapper or the Facebook SDK.
+LinkedIn	POST /v2/ugcPosts (create post content)​
+LEARN.MICROSOFT.COM
+
+POST /v2/assets?action=registerUpload (init image upload) and PUT upload
+GET /v2/posts/{id}/statistics (fetch post analytics)	LinkedIn REST API (HTTP) or third-party (Ayrshare, etc.)	OAuth 2.0 required (with correct scope). JSON payload must follow exact schema. Use Microsoft’s docs for reference.
+OpenAI	POST /v1/chat/completions (GPT-4 chat)
+POST /v1/moderations (Moderation API)	OpenAI Python SDK or requests	API key required. Use streaming if needed for large outputs (not likely needed here). Monitor token usage to avoid hitting quota.
+Stability AI	POST /v2/generation/.../text-to-image (generate image)​
+PLATFORM.STABILITY.AI
+
+Using these APIs in concert, our agents will act as the intelligence deciding what to post, while these tools handle how to post.
+Stability SDK or requests	API key required. Ensure prompt is effective. Handle image binary (the API returns a base64 or URL).
